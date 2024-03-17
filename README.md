@@ -18,8 +18,11 @@
     - [2.3.1 How to tackle communication challenges](#231-how-to-tackle-communication-challenges)
   - [2.4 Create Context Maps](#24-create-context-maps)
     - [2.4.1 Types of relationships](#241-types-of-relationships)
-  - [2.5 Anti Corruption Layer](#25-anti-corruption-layer)
+  - [2.5 Identify Anti Corruption Layers](#25-identify-anti-corruption-layers)
   - [2.6 Define Shared Kernels](#26-define-shared-kernels)
+- [3. Implementation](#3-implementation)
+  - [3.1 Domain Activities](#31-domain-activities)
+  - [3.2 Domain Objects](#32-domain-objects)
 
 # 1. What is DDD
 
@@ -30,6 +33,8 @@ Business materials:
 https://www.lucidchart.com/blog/domain-driven-design-introduction
 
 https://www.linkedin.com/pulse/entry-domain-driven-design-fundamentals-mohamed-hassan?trk=article-ssr-frontend-pulse_little-text-block
+
+https://lucidspark.com/blog/8-steps-in-the-event-storming-process#:~:text=Event%20storming%20looks%20at%20modeling,language%20when%20discussing%20the%20domain.
 
 Technical implementation materials:
 
@@ -200,7 +205,7 @@ Four types of relationships among bounded contexts
 
 * One-to-many relationship: Communication between two or more bounded contexts. Bounded context can connect and send messages to one or more bounded contexts. Commonly seen in publish-subscribe pattern, where component A sends a message to a broker, and the broker fan out that message to all of the subscribers.
 
-## 2.5 Anti Corruption Layer
+## 2.5 Identify Anti Corruption Layers
 A strategic pattern in DDD. It's basically a translator. Helps with microservice communication, but avoids business logic. Some ACL patterns are Facade and Adapters.
 
 ## 2.6 Define Shared Kernels
@@ -221,3 +226,39 @@ Require regular communication among all of the teams to evolve the shared kernel
 Need to be should be as small as possible, because it could slow down the development process if it becomes too big.
 
 Must guarantee backward compatibility because it can cause failures in microservices.
+
+# 3. Implementation
+## 3.1 Domain Activities
+
+Commands: What an actor wants to execute in a bounded context. Create Update Delete something in a bounded context.
+
+It must reflect the ubiquitous language that is defined in the bounded context
+
+Events:
+A domain can generate some results when executing commands. Those results are known as events. When an event is produced as a result of executing a command, it can be processed in different ways. For example, it can be stored in an append-only system or trigger events in other domains.
+
+They are immutable
+
+Event storming is used to identify events from domain experts.
+
+Domain events should be defined and built, only if they're required to support something like communication between bounded context.
+
+Queries: Read
+
+## 3.2 Domain Objects
+
+* Entities: domain objects identifiable by an ID. They may contain attributes and business logic.
+
+https://github.com/dotnet-architecture/eShopOnContainers/blob/main/src/Services/Ordering/Ordering.Domain/SeedWork/Entity.cs
+
+* Value Objects: domain objects that do not have an identifier. They may contain attributes and business logic. These attributes, together, become their source of identification. 
+
+(In Relational DB, these could just end up Extra Columns in a Entity table.) 
+
+https://stackoverflow.com/questions/679005/how-are-value-objects-stored-in-the-database
+
+* Aggregates: collection of domain objects that are treated as a single object.
+
+https://github.com/dotnet-architecture/eShopOnContainers/tree/main/src/Services/Ordering/Ordering.Domain/AggregatesModel
+
+* Aggregate Root: a cluster of entities, value objects, and other aggregates, which orchestrates every use case in the domain layer.
