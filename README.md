@@ -129,6 +129,8 @@ Green (The read model) highlights the specific data that allows one to make a de
 
 Pale yellow sticky (Aggregates) represent a specific business logic, with a particular responsibility. Aggregates let us discover bounded contexts.
 
+https://mrpicky.dev/wp-content/uploads/2021/12/DLES-Brandolini.png
+
 ### 2.1.3 Steps
 
 Map all events that occur in the process
