@@ -9,26 +9,35 @@
   - [1.2 Focus of DDD](#12-focus-of-ddd)
   - [1.3 Building blocks of DDD](#13-building-blocks-of-ddd)
 - [2. How to begin](#2-how-to-begin)
-  - [2.1 Event storming](#21-event-storming)
+  - [2.1 Have Event Storming Sessions](#21-have-event-storming-sessions)
     - [2.1.1 Event storming roles](#211-event-storming-roles)
     - [2.1.2 Required elements](#212-required-elements)
-    - [2.1.3](#213)
+    - [2.1.3 Steps](#213-steps)
+  - [2.2 Identify Bounded Context](#22-identify-bounded-context)
+  - [2.3 Create and Update Ubiquitus Language](#23-create-and-update-ubiquitus-language)
+    - [2.3.1 How to tackle communication challenges](#231-how-to-tackle-communication-challenges)
+  - [2.4 Create Context Maps](#24-create-context-maps)
+    - [2.4.1 Types of relationships](#241-types-of-relationships)
+  - [2.5 Anti Corruption Layer](#25-anti-corruption-layer)
+  - [2.6 Define Shared Kernels](#26-define-shared-kernels)
 
 # 1. What is DDD
 
 Useful articles
 
-Business:
+Business materials:
 
 https://www.lucidchart.com/blog/domain-driven-design-introduction
 
 https://www.linkedin.com/pulse/entry-domain-driven-design-fundamentals-mohamed-hassan?trk=article-ssr-frontend-pulse_little-text-block
 
-Technical implementation:
+Technical implementation materials:
 
 https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice
 
 https://learn.microsoft.com/en-us/dotnet/architecture/cloud-native/introduce-eshoponcontainers-reference-app
+
+* Dev hint: Tricks with entity framework code first can be used to implement reaction/policies in Entities from CommandHandlers before DomainEvents are created and handled, and using unit of work to transact them after domain event is generated. Can be seen in eShop example.
 
 ## 1.1 Key definitions
 
@@ -80,7 +89,7 @@ Factory
 
 # 2. How to begin
 
-## 2.1 Event storming
+## 2.1 Have Event Storming Sessions
 
 Events are baked into domains, and they are used as communications between domains / subdomains to be consumed.
 
@@ -115,7 +124,7 @@ Green (The read model) highlights the specific data that allows one to make a de
 
 Pale yellow sticky (Aggregates) represent a specific business logic, with a particular responsibility. Aggregates let us discover bounded contexts.
 
-### 2.1.3
+### 2.1.3 Steps
 
 Map all events that occur in the process
 
@@ -127,4 +136,88 @@ Map external services, questions, actors
 
 Map aggregates and read models
 
-Group aggregates together to find boundries among functionalities. Draw lines around bounded context
+Group aggregates together to find boundries among functionalities. Draw lines around them to form bounded context.
+
+## 2.2 Identify Bounded Context
+
+A bounded context is a strategic pattern used to maintain consistency between subdomains and their models. There must be a clear definition of limits between all of the bounded contexts that exist in a domain. These limits can be set during event storming.
+
+* Subdomains are the problem space
+
+* Bounded Contexts are the solution space
+
+* Every bounded context is translated into one or more modules or microservices in the future.
+
+When bounded contexts are defined, a team should take the following characteristics into account to confirm that they are designing bounded context well:
+
+Each bounded context should possess its own domain model. Each subdomain represents its structure and the way that every part interacts with another.
+
+Each bounded context uses its own ubiquitous language. Just because wording are the same doesn't mean they should be grouped in same bounding context if the meaning of the words are different in each domain.
+
+There is a clear separation of vocabulary that exists inside each subdomain in a large organization. It guarantees a clear definition of responsibilities and concerns that an actor may encounter.
+
+A domain model built for a bounded context is only suitable within its boundaries.
+
+## 2.3 Create and Update Ubiquitus Language
+
+When a domain is modeled during an event storming session, business experts may use business jargon and technical experts may use technical jargon. This will require both sides to translate the terms between each other, and may cause mistranslations and misinterpretations.
+
+In DDD, both domain and technical experts must speak the same language to guarantee that the software evolves quickly over time, and to solve this DDD offers a strategic pattern called ubiquitous language. 
+
+Ubiquitous language aims to avoid translations between the business and technical world to create a better understanding of the domain. 
+
+Software that is built on top of ubiquitous language is easy to understand, because it reflects business terminology in its code. Such software needs access to the exact names and terms that are defined in a model.
+
+### 2.3.1 How to tackle communication challenges
+Ubiquitous language solves this problem. In each business context, ubiquitous language is used by all of the participants in the model-definition process.
+
+The model has common terms and acronyms, which are all used within a defined context. If someone works in a specific context, it is implied that there is a context of particular and understandable terms. Different domains would have their own ubiquitous language.
+
+Ubiquitous language should evolve over time. It should be well-documented in a repository, such as in a Confluence, for a team to manage their common terminology. 
+
+This language consists of terms that are commonly used by business and technical experts. In other words, ubiquitous language is made up of a mixture of terminologies from both the business and the technical worlds.
+
+Ubiquitous language must be used across source code, testing code, daily conversations between domain and technical experts, and documentation to guarantee correct understanding of the domain and avoids the need for translations.
+
+## 2.4 Create Context Maps
+
+Bounded contexts are independent, but they do not work in isolation. 
+
+Context maps are mappings of the relationships between bounded contexts to understand the dependencies between them and how they communicate with each other.
+
+They are a visual representation of the relationships that are present between different bounded contexts and show the interactions and the types of connections that bounded contexts share.
+
+Context maps help to maintain clear communication between bounded contexts clearly showing what types of interactions occur during a business process. 
+
+### 2.4.1 Types of relationships
+Four types of relationships among bounded contexts
+
+* Separate ways: No need to connect two bounded contexts, because that interaction will not give significant payoffs to a team. These bounded contexts implement their own logic and operate in a separate way.
+
+* Symmetric relationship: Communication between two bounded contexts in both directions. This scenario is common in orchestrations where there is a component A that invokes component B. After an execution of something, component B invokes component A to convey the result (API)
+
+* Asymmetric relationship: Communication between two bounded contexts in only one direction. Commonly connected by queues, where component A sends a message to component B through a queue and does not wait for a response.
+
+* One-to-many relationship: Communication between two or more bounded contexts. Bounded context can connect and send messages to one or more bounded contexts. Commonly seen in publish-subscribe pattern, where component A sends a message to a broker, and the broker fan out that message to all of the subscribers.
+
+## 2.5 Anti Corruption Layer
+A strategic pattern in DDD. It's basically a translator. Helps with microservice communication, but avoids business logic. Some ACL patterns are Facade and Adapters.
+
+## 2.6 Define Shared Kernels
+External libraries ontains functionalities that are common across two or more bounded contexts. It avoids the repetition of code in several places and helps the projects evolve quickly over time.
+
+Pros:
+
+Reusability, because library can be included in many components.
+
+Streamlining the development process, because a lot of common functionalities are developed when a team wants to develop a new component.
+
+Government over components, because everyone controls changes.
+
+Cons:
+
+Require regular communication among all of the teams to evolve the shared kernel. Sometimes, this communication is difficult.
+
+Need to be should be as small as possible, because it could slow down the development process if it becomes too big.
+
+Must guarantee backward compatibility because it can cause failures in microservices.
